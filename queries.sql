@@ -143,6 +143,7 @@ select customer, sale_date, seller
 from rowed
 where row_number = 1 and income = 0
 order by customer_id
+;
 
 
 
