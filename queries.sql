@@ -125,7 +125,7 @@ rowed as (
         income,
         row_number() over (partition by customer order by sale_date)
     from full_names
-) as rn
+)
 
 select
     customer,
