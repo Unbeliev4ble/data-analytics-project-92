@@ -7,7 +7,6 @@ from customers;
 
 with tab as (
     select
-        *,
         s.quantity * p.price as income,
         concat_ws(' ', e.first_name, e.last_name) as seller_full
     from sales as s
@@ -31,7 +30,9 @@ order by average_income;
 
 with tab as (
     select
-        *,
+        s.sales_id,
+        p.price,
+        s.quantity,
         concat_ws(' ', e.first_name, e.last_name) as seller_full
     from sales as s
     left join employees as e on s.sales_person_id = e.employee_id
@@ -101,33 +102,35 @@ order by selling_month;
 --first purchase for 0 customers
 
 with full_names as (
-select
-    *,
-    concat_ws(' ', c.first_name, c.last_name) as customer,
-    concat_ws(' ', e.first_name, e.last_name) as seller,
-    p.price * s.quantity as income
-from sales as s
-left join customers as c on s.customer_id = c.customer_id
-left join products as p using (product_id)
-left join employees as e on s.sales_person_id = e.employee_id
+    select
+        s.sales_id,
+        s.customer_id,
+        s.sale_date,
+        concat_ws(' ', c.first_name, c.last_name) as customer,
+        concat_ws(' ', e.first_name, e.last_name) as seller,
+        p.price * s.quantity as income
+    from sales as s
+    left join customers as c on s.customer_id = c.customer_id
+    left join products as p on s.product_id = p.product_id
+    left join employees as e on s.sales_person_id = e.employee_id
 ),
 
 rowed as (
-select
-sales_id,
-customer,
-customer_id,
-seller,
-sale_date,
-income,
-row_number() over (partition by customer order by sale_date)
-from full_names
-)
+    select
+        sales_id,
+        customer,
+        customer_id,
+        seller,
+        sale_date,
+        income,
+        row_number() over (partition by customer order by sale_date)
+    from full_names
+) as rn
 
 select
-customer,
-sale_date,
-seller
+    customer,
+    sale_date,
+    seller
 from rowed
 where row_number = 1 and income = 0
 order by customer_id;
