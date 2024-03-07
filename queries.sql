@@ -123,7 +123,7 @@ rowed as (
         seller,
         sale_date,
         income,
-        row_number() over (partition by customer order by sale_date)
+        row_number() over (partition by customer order by sale_date) as rn
     from full_names
 )
 
@@ -132,5 +132,5 @@ select
     sale_date,
     seller
 from rowed
-where row_number = 1 and income = 0
+where rn = 1 and income = 0
 order by customer_id;
